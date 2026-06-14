@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="[thymeleaf.org](http://www.thymeleaf.org)">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Administrator</title>
+</head>
+<body>
+
+<h1>👨‍💼 Dashboard Administrator</h1>
+<a href="/home">← Înapoi la selecție rol</a>
+
+<hr/>
+
+<!-- ══ NOTIFICĂRI ══════════════════════════════════════════ -->
+<div th:if="${notificari != null and !notificari.isEmpty()}"
+     style="background:#fff3cd; border:1px solid #ffc107; padding:10px; margin-bottom:15px;">
+    <strong>🔔 Notificări — Comenzi noi neprocessate:</strong>
+    <ul>
+        <li th:each="n : ${notificari}">
+            Comanda #<span th:text="${n.id}"></span>
+            — Client: <span th:text="${n.client}"></span>
+            — Produse: <span th:text="${n.numeProduse}"></span>
+            — Total: <span th:text="${n.total}"></span> RON
+        </li>
+    </ul>
+</div>
+
+<div th:if="${notificari == null or notificari.isEmpty()}"
+     style="background:#d4edda; border:1px solid #28a745; padding:10px; margin-bottom:15px;">
+    ✅ Nu există comenzi noi de procesat.
+</div>
+
+<!-- ══ EROARE ══════════════════════════════════════════════ -->
+<p th:if="${param.eroare}" style="color:red;">
+    ⚠️ Doar comenzile în starea PLASATA pot fi anulate.
+</p>
+
+<hr/>
+
+<!-- ══ FILTRARE ════════════════════════════════════════════ -->
+<form method="get" action="/admin/dashboard">
+    <label>Filtrează după stare:</label>
+    <select name="stare">
+        <option value="">-- Toate --</option>
+        <option th:each="s : ${stari}"
+                th:value="${s.name()}"
+                th:text="${s.name()}"
+                th:selected="${s == stareSelectata}">
+        </option>
+    </select>
+    <button type="submit">Filtrează</button>
+</form>
+
+<!-- ══ CĂUTARE ═════════════════════════════════════════════ -->
+<form method="get" action="/admin/dashboard">
+    <label>Caută client:</label>
+    <input type="text" name="client" placeholder="Nume client"/>
+    <button type="submit">Caută</button>
+</form>
+
+<hr/>
+
+<!-- ══ TABEL COMENZI ═══════════════════════════════════════ -->
+<table border="1" cellpadding="6">
+    <tr>
+        <th>ID</th>
+        <th>Client</th>
+        <th>Produse</th>
+        <th>Total (RON)</th>
+        <th>Stare</th>
+        <th>Schimbă Starea</th>
+        <th>Acțiuni</th>
+    </tr>
+    <tr th:each="c : ${comenzi}">
+        <td th:text="${c.id}"></td>
+        <td th:text="${c.client}"></td>
+        <td th:text="${c.numeProduse}"></td>
+        <td th:text="${c.total}"></td>
+        <td th:text="${c.stare}"></td>
+
+        <!-- Schimbare stare direct din tabel -->
+        <td>
+            <form th:action="@{/admin/comanda/{id}/stare(id=${c.id})}"
+                  method="post" style="display:inline">
+                <select name="stareNoua">
+                    <option th:each="s : ${stari}"
+                            th:value="${s.name()}"
+                            th:text="${s.name()}"
+                            th:selected="${s == c.stare}">
+                    </option>
+                </select>
+                <button type="submit">Actualizează</button>
+            </form>
+        </td>
+
+        <!-- Anulare (doar PLASATA) -->
+        <td>
+            <form th:if="${c.stare.name() == 'PLASATA'}"
+                  th:action="@{/admin/comanda/{id}/anuleaza(id=${c.id})}"
+                  method="post" style="display:inline">
+                <button type="submit"
+                        onclick="return confirm('Sigur anulezi comanda?')"
+                        style="color:red;">
+                    ✖ Anulează
+                </button>
+            </form>
+            <span th:if="${c.stare.name() != 'PLASATA'}"
+                  style="color:gray;">—</span>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

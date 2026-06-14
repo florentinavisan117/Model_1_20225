@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="[thymeleaf.org](http://www.thymeleaf.org)">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Client</title>
+</head>
+<body>
+
+<h1>🛒 Dashboard Client</h1>
+<a href="/home">← Înapoi la selecție rol</a>
+
+<hr/>
+
+<!-- ══ EROARE ══════════════════════════════════════════════ -->
+<p th:if="${param.eroare}" style="color:red;">
+    ⚠️ Doar comenzile în starea PLASATA pot fi anulate.
+</p>
+
+<!-- ══ PLASARE COMANDĂ NOUĂ ════════════════════════════════ -->
+<h3>Plasează o comandă nouă</h3>
+
+<form th:action="@{/client/comanda/adauga}" method="post" th:object="${comanda}">
+    <label>Numele tău:</label>
+    <input type="text" th:field="*{client}" required/><br/><br/>
+
+    <label>Produse:</label>
+    <input type="text" th:field="*{numeProduse}" required/><br/><br/>
+
+    <label>Total (RON):</label>
+    <input type="number" step="0.01" th:field="*{total}" required/><br/><br/>
+
+    <button type="submit">✔ Plasează Comanda</button>
+</form>
+
+<hr/>
+
+<!-- ══ CAUTĂ COMENZILE TALE ════════════════════════════════ -->
+<h3>Comenzile tale</h3>
+
+<form method="get" action="/client/dashboard">
+    <input type="text" name="client"
+           th:value="${clientCurent}"
+           placeholder="Introdu numele tău"/>
+    <button type="submit">🔍 Caută</button>
+</form>
+
+<br/>
+
+<!-- ══ NOTIFICĂRI CLIENT ════════════════════════════════════ -->
+<!-- Afișăm starea fiecărei comenzi găsite ca notificare -->
+<div th:if="${notificariClient != null and !notificariClient.isEmpty()}"
+     style="background:#e2f0fe; border:1px solid #b8daff; padding:15px; margin-bottom:15px; border-radius: 5px;">
+    <strong>🔔 Notificări noi privind comenzile tale:</strong>
+    <ul style="margin-top: 5px; margin-bottom: 0;">
+        <li th:each="n : ${notificariClient}" th:text="${n.mesaj}" style="color: #004085; font-weight: bold;">
+            Aici va apărea mesajul notificării (Ex: Comanda #1 a fost EXPEDIATA)
+        </li>
+    </ul>
+</div>
+
+<!-- ══ TABEL COMENZI CLIENT ════════════════════════════════ -->
+<table th:if="${comenzi != null and !comenzi.isEmpty()}"
+       border="1" cellpadding="6">
+    <tr>
+        <th>ID</th>
+        <th>Produse</th>
+        <th>Total (RON)</th>
+        <th>Stare</th>
+        <th>Acțiuni</th>
+    </tr>
+    <tr th:each="c : ${comenzi}">
+        <td th:text="${c.id}"></td>
+        <td th:text="${c.numeProduse}"></td>
+        <td th:text="${c.total}"></td>
+        <td th:text="${c.stare.name()}"></td>
+        <td>
+            <!-- Clientul poate anula doar dacă e PLASATA -->
+            <form th:if="${c.stare.name() == 'PLASATA'}"
+                  th:action="@{/client/comanda/{id}/anuleaza(id=${c.id})}"
+                  method="post" style="display:inline">
+                <input type="hidden" name="clientNume"
+                       th:value="${clientCurent}"/>
+                <button type="submit"
+                        onclick="return confirm('Sigur anulezi?')"
+                        style="color:red;">
+                    ✖ Anulează
+                </button>
+            </form>
+            <span th:if="${c.stare.name() != 'PLASATA'}"
+                  style="color:gray;">—</span>
+        </td>
+    </tr>
+</table>
+
+<p th:if="${clientCurent != null and (comenzi == null or comenzi.isEmpty())}"
+   style="color:gray;">
+    Nu s-au găsit comenzi pentru "<span th:text="${clientCurent}"></span>".
+</p>
+
+</body>
+</html>

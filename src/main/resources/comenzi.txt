@@ -1,0 +1,7 @@
+Ion Popescu|Laptop Dell|3500.00|PLASATA
+Maria Ionescu|Telefon Samsung|2200.00|PROCESATA
+Andrei Popa|Căști Sony|450.00|EXPEDIATA
+Elena Radu|Monitor LG|1800.00|LIVRATA
+Ion Popescu|Tastatură Logitech|320.00|PLASATA
+Gheorghe Stan|Mouse Razer|250.00|PROCESATA
+Ana Dumitrescu|Webcam Logitech|380.00|EXPEDIATA
